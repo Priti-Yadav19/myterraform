@@ -1,7 +1,7 @@
 terraform {
-    backend "s3" {
-        bucket = "tf-state-98fty"
+    backend "s3-bucket" {
+        bucket = "rudraawsbucket123"
         key    = "development/terraform_state"
-        region = "us-east-2"
+        region = "us-east-1"
     }
 }
