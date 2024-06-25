@@ -16,7 +16,7 @@ variable "PATH_TO_PRIVATE_KEY" {
 }
 
 variable "PATH_TO_PUBLIC_KEY" {
-  default = "path/to/your/public/key.pub"
+  default = "levelup_key.pub"
 }
 
 variable "AMIS" {

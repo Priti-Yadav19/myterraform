@@ -12,6 +12,6 @@ resource "aws_instance" "MyFirstInstnace" {
   tags = {
     Name = "custom_instance"
   }
-  vpc_security_group_ids = [aws_security_group.my_sg].id
+  vpc_security_group_ids = [aws_security_group.my_sg.id]
   subnet_id = aws_subnet.public_subnet2.id
 }
