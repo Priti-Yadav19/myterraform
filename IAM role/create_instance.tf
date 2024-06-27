@@ -9,8 +9,7 @@ resource "aws_instance" "MyFirstInstnace" {
   instance_type = "t2.micro"
   availability_zone = "us-east-2a"
   key_name      = aws_key_pair.levelup_key.key_name
-  vpc_security_group_ids = [aws_security_group.my_sg.id] 
-  subnet_id = aws_subnet.public_subnet1.id
+  iam_instance_profile = aws_iam_instance_profile.II.name
 
   tags = {
     Name = "custom_instance"
