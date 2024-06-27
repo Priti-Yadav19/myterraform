@@ -25,11 +25,11 @@ resource "aws_db_instance" "maria_db" {
   username             = "root"
   password             = "admin123"
   parameter_group_name = "aws_db_parameter_group.mariadb-parameter.name"
-  db_subnet_group_name = aws_db_subnet_group.mariadb-subnets.name
+  db_subnet_group_name = "aws_db_subnet_group.mariadb-subnets.name"
   multi_az = "false"
   vpc_security_group_ids = [aws_security_group.maria_sg.id]
   storage_type = "gp2"
   backup_retention_period = 30
-  availability_zone = aws_db_subnet_group.mariadb-subnets
+  availability_zone = "aws_db_subnet_group.mariadb-subnets.id"
   skip_final_snapshot = true
 }
