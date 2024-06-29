@@ -1,17 +1,3 @@
-# Generate key
-resource "aws_key_pair" "levelup_key" {
-  key_name   = "levelup_key"
-  public_key = file(var.PATH_TO_PUBLIC_KEY)
-}
-
-# Autoscaling launch configuration
-resource "aws_launch_configuration" "as_lc" {
-  name_prefix   = "as_lc"
-  image_id      = lookup(var.AMIS, var.AWS_REGION)
-  instance_type = "t2.micro"
-  key_name      = aws_key_pair.levelup_key.key_name
-}
-
 # Auto scaling group
 resource "aws_autoscaling_group" "myASG" {
   name                      = "myASG"
@@ -22,13 +8,27 @@ resource "aws_autoscaling_group" "myASG" {
   desired_capacity          = 1
   force_delete              = true
   launch_configuration      = aws_launch_configuration.as_lc.name
-  vpc_zone_identifier =  ["aws_subnet.subnet-0eff5706bcb6e07fd.id", "aws_subnet.subnet-0b003de7c5a5726ba.id"]
+  vpc_zone_identifier       = ["subnet-0eff5706bcb6e07fd", "subnet-0b003de7c5a5726ba"]
 
   tag {
     key                 = "Name"
     value               = "autoscaling-instance"
     propagate_at_launch = true
   }
+}
+
+# Launch configuration
+resource "aws_launch_configuration" "as_lc" {
+  name_prefix   = "as_lc"
+  image_id      = lookup(var.AMIS, var.AWS_REGION)
+  instance_type = "t2.micro"
+  key_name      = aws_key_pair.levelup_key.key_name
+}
+
+# generate key
+resource "aws_key_pair" "levelup_key" {
+  key_name   = "levelup_key"
+  public_key = file(var.PATH_TO_PUBLIC_KEY)
 }
 
 # Autoscaling policy - scaling up
@@ -41,7 +41,7 @@ resource "aws_autoscaling_policy" "cpu_policy" {
   policy_type            = "SimpleScaling"
 }
 
-# Autoscaling CloudWatch alarm for scaling up
+# CloudWatch alarm for scaling up
 resource "aws_cloudwatch_metric_alarm" "CWalarm" {
   alarm_name                = "CWalarm"
   comparison_operator       = "GreaterThanOrEqualToThreshold"
@@ -70,7 +70,7 @@ resource "aws_autoscaling_policy" "scaledown_policy" {
   policy_type            = "SimpleScaling"
 }
 
-# Autoscaling CloudWatch alarm for scaling down
+# CloudWatch alarm for scaling down
 resource "aws_cloudwatch_metric_alarm" "CWalarmscaledown" {
   alarm_name                = "CWalarmscaledown"
   comparison_operator       = "LessThanOrEqualToThreshold"
