@@ -22,7 +22,7 @@ resource "aws_autoscaling_group" "ASG" {
   desired_capacity          = 1
   force_delete              = true
   launch_configuration      = aws_launch_configuration.as_lc.name
-  availability_zones = ["use1-az4", "use1-az6"]
+  availability_zones = ["us-east-1a", "us-east-1b"]
 
   tag {
     key                 = "Name"
