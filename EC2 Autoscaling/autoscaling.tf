@@ -22,7 +22,7 @@ resource "aws_autoscaling_group" "ASG" {
   desired_capacity          = 1
   force_delete              = true
   launch_configuration      = aws_launch_configuration.as_lc.name
-  availability_zones = ["us-east-1a", "us-east-1b"]
+  vpc_zone_identifier =  ["aws_subnet.subnet-0eff5706bcb6e07fd.id", "aws_subnet.subnet-0b003de7c5a5726ba.id"]
 
   tag {
     key                 = "Name"
