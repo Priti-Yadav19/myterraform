@@ -13,8 +13,8 @@ resource "aws_launch_configuration" "as_lc" {
 }
 
 # Auto scaling group
-resource "aws_autoscaling_group" "ASG" {
-  name                      = "ASG"
+resource "aws_autoscaling_group" "myASG" {
+  name                      = "myASG"
   max_size                  = 2
   min_size                  = 1
   health_check_grace_period = 200
@@ -37,7 +37,7 @@ resource "aws_autoscaling_policy" "cpu_policy" {
   scaling_adjustment     = 1
   adjustment_type        = "ChangeInCapacity"
   cooldown               = 300
-  autoscaling_group_name = aws_autoscaling_group.ASG.name
+  autoscaling_group_name = aws_autoscaling_group.myASG.name
   policy_type            = "SimpleScaling"
 }
 
@@ -54,7 +54,7 @@ resource "aws_cloudwatch_metric_alarm" "CWalarm" {
   alarm_description         = "This metric monitors EC2 CPU utilization"
   insufficient_data_actions = []
   dimensions = {
-    AutoScalingGroupName = aws_autoscaling_group.ASG.name
+    AutoScalingGroupName = aws_autoscaling_group.myASG.name
   }
   actions_enabled = true
   alarm_actions   = [aws_autoscaling_policy.cpu_policy.arn]
@@ -66,7 +66,7 @@ resource "aws_autoscaling_policy" "scaledown_policy" {
   scaling_adjustment     = -1
   adjustment_type        = "ChangeInCapacity"
   cooldown               = 300
-  autoscaling_group_name = aws_autoscaling_group.ASG.name
+  autoscaling_group_name = aws_autoscaling_group.myASG.name
   policy_type            = "SimpleScaling"
 }
 
@@ -83,7 +83,7 @@ resource "aws_cloudwatch_metric_alarm" "CWalarmscaledown" {
   alarm_description         = "This metric monitors EC2 CPU utilization"
   insufficient_data_actions = []
   dimensions = {
-    AutoScalingGroupName = aws_autoscaling_group.ASG.name
+    AutoScalingGroupName = aws_autoscaling_group.myASG.name
   }
   actions_enabled = true
   alarm_actions   = [aws_autoscaling_policy.scaledown_policy.arn]
