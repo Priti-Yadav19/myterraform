@@ -1,12 +1,3 @@
-# Fetching subnet IDs dynamically
-data "aws_subnet" "subnet1" {
-  id = "subnet-0eff5706bcb6e07fd"
-}
-
-data "aws_subnet" "subnet2" {
-  id = "subnet-0b003de7c5a5726ba"
-}
-
 # Auto scaling group
 resource "aws_autoscaling_group" "myASG" {
   name                      = "myASG"
@@ -17,7 +8,7 @@ resource "aws_autoscaling_group" "myASG" {
   desired_capacity          = 1
   force_delete              = true
   launch_configuration      = aws_launch_configuration.as_lc.name
-  vpc_zone_identifier       = [data.aws_subnet.subnet1.id, data.aws_subnet.subnet2.id]
+  vpc_zone_identifier       = ["subnet-0eff5706bcb6e07fd", "subnet-0b003de7c5a5726ba"]
 
   tag {
     key                 = "Name"
@@ -34,7 +25,7 @@ resource "aws_launch_configuration" "as_lc" {
   key_name      = aws_key_pair.levelup_key.key_name
 }
 
-# Generate key
+# generate key
 resource "aws_key_pair" "levelup_key" {
   key_name   = "levelup_key"
   public_key = file(var.PATH_TO_PUBLIC_KEY)
