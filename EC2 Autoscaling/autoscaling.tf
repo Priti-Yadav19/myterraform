@@ -32,7 +32,7 @@ resource "aws_autoscaling_policy" "cpu_policy" {
   adjustment_type        = "ChangeInCapacity"
   cooldown               = 300
   autoscaling_group_name = aws_autoscaling_group.ASG.name
-  policy_type = "simpleScaling"
+  policy_type = "SimpleScaling"
 }
 
 # Autoscaling cloud watch monitoring
@@ -59,7 +59,7 @@ resource "aws_autoscaling_policy" "scaledown_policy" {
   adjustment_type        = "ChangeInCapacity"
   cooldown               = 300
   autoscaling_group_name = aws_autoscaling_group.ASG.name
-  policy_type = "simpleScaling"
+  policy_type = "SimpleScaling"
 }
 
 # Auto descaling cloudwatch
