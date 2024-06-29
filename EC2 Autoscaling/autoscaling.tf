@@ -1,15 +1,15 @@
+# Generate key
+resource "aws_key_pair" "levelup_key" {
+  key_name   = "levelup_key"
+  public_key = file(var.PATH_TO_PUBLIC_KEY)
+}
+
 # Autoscaling launch configuration
 resource "aws_launch_configuration" "as_lc" {
   name_prefix   = "as_lc"
   image_id      = lookup(var.AMIS, var.AWS_REGION)
   instance_type = "t2.micro"
-  key_name = aws_key_pair.levelup_key.key_name
-}
-
-# generate key
-resource "aws_key_pair" "levelup_key" {
-    key_name = "levelup_key"
-    public_key = file(var.PATH_TO_PUBLIC_KEY)
+  key_name      = aws_key_pair.levelup_key.key_name
 }
 
 # Auto scaling group
@@ -22,20 +22,26 @@ resource "aws_autoscaling_group" "ASG" {
   desired_capacity          = 1
   force_delete              = true
   launch_configuration      = aws_launch_configuration.as_lc.name
-  vpc_zone_identifier       = ["us-east-2a", "us-east-2b"]
+  vpc_zone_identifier       = [aws_subnet.subnet1.id, aws_subnet.subnet2.id]
+
+  tag {
+    key                 = "Name"
+    value               = "autoscaling-instance"
+    propagate_at_launch = true
+  }
 }
 
-# Autoscaling configuration policy- scaling alarm
+# Autoscaling policy - scaling up
 resource "aws_autoscaling_policy" "cpu_policy" {
   name                   = "cpu_policy"
   scaling_adjustment     = 1
   adjustment_type        = "ChangeInCapacity"
   cooldown               = 300
   autoscaling_group_name = aws_autoscaling_group.ASG.name
-  policy_type = "SimpleScaling"
+  policy_type            = "SimpleScaling"
 }
 
-# Autoscaling cloud watch monitoring
+# Autoscaling CloudWatch alarm for scaling up
 resource "aws_cloudwatch_metric_alarm" "CWalarm" {
   alarm_name                = "CWalarm"
   comparison_operator       = "GreaterThanOrEqualToThreshold"
@@ -45,24 +51,26 @@ resource "aws_cloudwatch_metric_alarm" "CWalarm" {
   period                    = 120
   statistic                 = "Average"
   threshold                 = 30
-  alarm_description         = "This metric monitors ec2 cpu utilization"
+  alarm_description         = "This metric monitors EC2 CPU utilization"
   insufficient_data_actions = []
-  dimensions = aws_autoscaling_group.ASG.name
+  dimensions = {
+    AutoScalingGroupName = aws_autoscaling_group.ASG.name
+  }
   actions_enabled = true
-  alarm_actions = aws_autoscaling_policy.cpu_policy.name
+  alarm_actions   = [aws_autoscaling_policy.cpu_policy.arn]
 }
 
-# Auto descaling policy
+# Autoscaling policy - scaling down
 resource "aws_autoscaling_policy" "scaledown_policy" {
   name                   = "scaledown_policy"
   scaling_adjustment     = -1
   adjustment_type        = "ChangeInCapacity"
   cooldown               = 300
   autoscaling_group_name = aws_autoscaling_group.ASG.name
-  policy_type = "SimpleScaling"
+  policy_type            = "SimpleScaling"
 }
 
-# Auto descaling cloudwatch
+# Autoscaling CloudWatch alarm for scaling down
 resource "aws_cloudwatch_metric_alarm" "CWalarmscaledown" {
   alarm_name                = "CWalarmscaledown"
   comparison_operator       = "LessThanOrEqualToThreshold"
@@ -72,9 +80,11 @@ resource "aws_cloudwatch_metric_alarm" "CWalarmscaledown" {
   period                    = 120
   statistic                 = "Average"
   threshold                 = 10
-  alarm_description         = "This metric monitors ec2 cpu utilization"
+  alarm_description         = "This metric monitors EC2 CPU utilization"
   insufficient_data_actions = []
-  dimensions = aws_autoscaling_group.ASG.name
+  dimensions = {
+    AutoScalingGroupName = aws_autoscaling_group.ASG.name
+  }
   actions_enabled = true
-  alarm_actions = aws_autoscaling_policy.scaledown_policy.name
+  alarm_actions   = [aws_autoscaling_policy.scaledown_policy.arn]
 }
