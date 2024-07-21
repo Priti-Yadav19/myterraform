@@ -1,0 +1,111 @@
+Text Direction : SetUp EKS using AWS CLI
+This document will explain all steps to Create EKS cluster and Worker Nodes using AWS CLI. Also, execute the application on Kubernetes in AWS.
+
+
+
+Pre-requisites:
+
+  AWSCLI
+  Install kubectl
+  Install aws-iam-authenticator
+
+
+Step 1:  AWS CLI needed to interact with AWS cloud resources. A profile with administrative access should be configured.
+
+aws --version
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+aws --version
+
+
+Step 2: Install kubectl configuration
+
+curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.18.9/2020-11-02/bin/linux/amd64/kubectl
+chmod +x ./kubectl
+sudo mv ./kubectl /usr/local/bin
+kubectl version --short --client
+
+
+Step 3: Install aws-iam-authenticator on the machine.
+
+curl -o aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.18.9/2020-11-02/bin/linux/amd64/aws-iam-authenticator
+chmod +x ./aws-iam-authenticator
+sudo mv ./aws-iam-authenticator /usr/local/bin
+aws-iam-authenticator help
+
+
+Step 4: Create Role (for accessing EKS cluster create a role with AmazonEKSClusterPolicy and AmazonEKSServicePolicy policies)
+
+
+
+Step 5: Create VPC by using Cloudformation template
+
+https://s3.us-west-2.amazonaws.com/amazon-eks/cloudformation/2020-10-29/amazon-eks-vpc-private-subnets.yaml
+
+
+
+Step 6: Create an EKS Cluster using AWS CLI (Replace VPC, Subnets, Security Group IDs as we discussed in Video Lecture.)
+
+aws eks create-cluster \
+  --name eks-cluster \
+  --region ap-south-1 \
+  --role-arn arn:aws:iam::164435161465:role/AWSEKS \
+  --resources-vpc-config subnetIds=subnet-0e9262808d9590cd1,subnet-0334a7efa5f08d8ec,subnet-0a887939bf2e8e5b3,subnet-03bdcfb2e971600f9,securityGroupIds=sg-047618421cb9aebbe
+
+
+Status check for EKS cluster -
+
+aws eks --region us-east-2 describe-cluster --name eks-cluster --query cluster.status
+
+
+
+Step 7:  Update Cluster in Kube Config for KubeCtl
+
+aws eks --region us-east-1 update-kubeconfig --name eks-cluster
+kubectl get svc
+Identify the nodes attached with EKS Cluster.
+
+kubectl get nodes
+
+
+
+Step 8: Create nodes for the EKS cluster using the Cloudformation template
+
+https://s3.us-west-2.amazonaws.com/amazon-eks/cloudformation/2020-10-29/amazon-eks-nodegroup.yaml
+
+
+
+Step 9: Map Nodes to EKS Master Node
+
+curl -o aws-auth-cm.yaml https://s3.us-west-2.amazonaws.com/amazon-eks/cloudformation/2020-10-29/aws-auth-cm.yaml
+
+
+
+Update Node Role ARN in the file and apply that config using the below command.
+
+kubectl apply -f aws-auth-cm.yaml
+
+
+
+Step 10: Check nodes of the cluster
+
+kubectl get nodes --watch
+
+
+
+Step 11: Deploy Nginx image
+
+kubectl create deployment --image=nginx nginx-app
+
+kubectl get deployments
+
+
+
+Step 12: Create Service in Kubernetes to connect with Deloyment
+
+kubectl expose deployment nginx-app --port=80 --name=nginx-http --type LoadBalancer
+
+kubectl get svc nginx-http
+
+Now you would be able to access your deployment over the Load Balancer created by EKS Service.
