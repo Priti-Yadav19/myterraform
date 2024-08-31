@@ -48,6 +48,21 @@ env | grep -i aws
 printenv
 
 ---------------------------------------------------------
+Creating multiple instances:
+resource "aws_instance" "myfirst_instance" {
+    count = 3
+    ami = "ami-0b0ea68c435eb488d"
+    instance_type = "t2.micro"
+
+    tags = {
+      Name = "demo_instance-${count.index}"                           (to provide unique names to each instance)
+    }
+}
+
+
+
+
+
 
 Creating multiple instances:
 
