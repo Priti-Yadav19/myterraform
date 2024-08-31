@@ -1,0 +1,54 @@
+create_instance.tf:
+
+provider "aws" {
+access_key = "access_key_here"
+secret_key = "secret_key_here"
+region = "us-east-1"
+}
+
+resource "aws_instance" "myfirst_instance" {
+    ami = "ami-0b0ea68c435eb488d"
+    instance_type = "t2.micro"
+}
+
+terraform init
+terraform plan
+terrafrom apply
+terraform destroy
+
+----------------------------------------------------
+
+Creating seperate provider.tf centralised file so that credentials do not need to be stored in each configuration files and can be utilsed in different environments:
+
+provide.tf:
+
+provider "aws" {
+access_key = "access_key"
+secret_key = "secret_key"
+region = "us-east-1"
+}
+
+  create_instance.tf
+
+  resource "aws_instance" "myfirst_instance" {
+    ami = "ami-0b0ea68c435eb488d"
+    instance_type = "t2.micro"
+}
+
+--------------------------------------------------
+
+  providing credentials as environment variables, to make it independent of directory structure:
+  
+type below commands on CLI:
+export AWS_ACCESS_KEY_ID="access_key"
+export AWS_SECRET_ACCESS_KEY="secret_key"
+export AWS_DEFAULT_REGION="us-east-1"
+
+env | grep -i aws
+printenv
+
+---------------------------------------------------------
+
+Creating multiple instances:
+
+
