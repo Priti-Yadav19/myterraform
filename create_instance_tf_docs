@@ -59,11 +59,63 @@ resource "aws_instance" "myfirst_instance" {
     }
 }
 
+----------------------------------------------------------------
+
+Note:
+- If we have flexible configuration file, we can pass the environment specific configuration at the runtime.
+Using Terraform input variables is one of the way of deploying development, 
+staging or production environments using the same terraform resource declarations, with slightly different configuration.
+
+- Variables are necessary to parameterizing our deployments using terraform.
+- Use variables to manage the secret.
+- Use variables for dynamic elemnets like AMI, for this we have to use maps data type as variable as AMI's are regional scoped.
+- variables makes files flexible and env independent.
+- to avoid particular file (eg: terraform.tfvars) in GitHub repository, we have to include that file in gitignore.
+
+create_instance.tf:
+
+resource "aws_instance" "myfirst_instance" {
+    ami = "ami-0b0ea68c435eb488d"
+    instance_type = "t2.micro"
+
+    tags = {
+      Name = "demo_instance"
+    }
+}
+
+provider.tf:
+
+provider "aws" {
+access_key = "${var.AWS_ACCESS_KEY}"
+secret_key = "${var.AWS_SECRET_KEY}"
+region = "${var.AWS_REGION}"
+}
+
+variables.tf:
+- defining the blank values for access and secret key
+
+variable "AWS_ACCESS_KEY" {}
+variable "AWS_SECRET_KEY" {}
+variable "AWS_REGION" {
+default = "us-east-1"
+}
+
+- We can pass these credentials at run time when prompted or 
+-We can mention the variables with execution command itself as below:
+terraform plan -var AWS_ACCESS_KEY="access_ket_here" -var AWS_SECRET_KEY="secret_key here"
+- Or we can define the variables as defined in below file:
+
+vi terraform.tfvars
+
+AWS_ACCESS_KEY="access_key_here"
+AWS_SECRET_KEY="secret_key_here"
+
+--------------------------------------------------------------------------------------------------------
 
 
 
 
 
-Creating multiple instances:
+
 
 
