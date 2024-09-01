@@ -185,6 +185,7 @@ resource "aws_instance" "myfirst_instance" {
     security_groups = "${var.Security_Group}"
 }
 
+terraform plan -var AWS_REGION="us-west-2"
 --------------------------------------------------------------------------------------------------------
 
 
