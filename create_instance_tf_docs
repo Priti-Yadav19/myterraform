@@ -112,6 +112,81 @@ AWS_SECRET_KEY="secret_key_here"
 
 --------------------------------------------------------------------------------------------------------
 
+Lists and Maps:
+
+Providing lists of security group:
+variables.tf:
+
+variable "AWS_ACCESS_KEY" {}
+variable "AWS_SECRET_KEY" {}
+variable "AWS_REGION" {
+default = "us-east-1"
+}
+
+variable "Security_Group"{
+  type = "list"
+  default = ["sg-12334", "sg-12333", sg-1878]
+}
+
+
+create_instance.tf:
+
+resource "aws_instance" "myfirst_instance" {
+    ami = "ami-0b0ea68c435eb488d"
+    instance_type = "t2.micro"
+
+    tags = {
+      Name = "demo_instance"
+    }
+    security_groups = "${var.Security_Group}"
+}
+----------------------------------------------------------------------------
+
+Map variables:
+suppose we need to choose between regions then AMI which is region specifuc cannot be given as hardcoded values,
+we have to define them as map variables:
+It should be provided as key value pairs, where key should be aws region and value is AMI.
+
+note: google AWS AMI locator to find the AMIs in specific regions.
+
+variables.tf:
+
+variable "AWS_ACCESS_KEY" {}
+variable "AWS_SECRET_KEY" {}
+variable "AWS_REGION" {
+default = "us-east-1"
+}
+
+variable "Security_Group"{
+  type = "list"
+  default = ["sg-12334", "sg-12333", sg-1878]
+}
+
+variable "AMIS" {
+  type = map
+  default ={
+    us-east-1 = "ami_of_us-east-1_here"
+    us-east-2 = "ami_of_us-east-2_here"
+    us-west-1 = "ami_of_us-west-1_here"
+    us-west-2 = "ami_of_us-west-2_here"
+  }
+}
+
+lookup fuction will search the value aws region inside the variable AWS AMIS:
+create_instance.tf
+
+resource "aws_instance" "myfirst_instance" {
+    ami = "lookup(var.AMIS, var.AWS_REGION)"
+    instance_type = "t2.micro"
+
+    tags = {
+      Name = "demo_instance"
+    }
+    security_groups = "${var.Security_Group}"
+}
+
+--------------------------------------------------------------------------------------------------------
+
 
 
 
